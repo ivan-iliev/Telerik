@@ -1,0 +1,29 @@
+﻿<Properties StartupConfiguration="{E82F42DA-547A-7800-9D33-8277D8E74936}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Fractal/Fractal.compute">
+    <Files>
+      <File FileName="Assets/Scripts/Fractal/Fractal.compute" Line="101" Column="33" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Ray-Marching-master" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Fractal" expanded="True">
+                  <Node name="Fractal.compute" selected="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="6690ae50-64ee-41fe-bf52-2c5e1e80c748" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -1,0 +1,17 @@
+﻿<Properties StartupConfiguration="{CD0E1885-A415-C34B-27C3-56964E2426DC}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/SCRIPT/move.cs">
+    <Files>
+      <File FileName="Assets/SCRIPT/spawn.cs" Line="23" Column="2" />
+      <File FileName="Assets/SCRIPT/rotation.cs" Line="13" Column="2" />
+      <File FileName="Assets/SCRIPT/move.cs" Line="40" Column="5" />
+      <File FileName="Assets/SCRIPT/camera.cs" Line="4" Column="20" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Unity_2204 PreferredExecutionTarget="Unity.Editor" />
+</Properties>

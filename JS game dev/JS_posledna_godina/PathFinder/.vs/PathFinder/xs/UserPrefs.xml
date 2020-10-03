@@ -1,0 +1,14 @@
+﻿<Properties StartupConfiguration="{F2675385-8923-D898-493E-CF1BBA9635EE}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Easy Weapons/Scripts/MoveTo.cs">
+    <Files>
+      <File FileName="Assets/Easy Weapons/Scripts/MoveTo.cs" Line="28" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.PathFinder PreferredExecutionTarget="Unity.Editor" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

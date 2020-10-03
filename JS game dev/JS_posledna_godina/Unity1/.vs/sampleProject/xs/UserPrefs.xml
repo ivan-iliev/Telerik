@@ -1,0 +1,14 @@
+﻿<Properties StartupConfiguration="{68E371A0-853D-B2A0-3FE2-05E2DC01CABB}|">
+  <MonoDevelop.Ide.ItemProperties.sampleProject PreferredExecutionTarget="Unity.Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/c#/FollowObject.cs">
+    <Files>
+      <File FileName="Assets/c#/FollowObject.cs" Line="22" Column="6" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -1,0 +1,12 @@
+Base path: /Applications/Unity/Unity.app/Contents
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 14 at Raymarching.compute(136): use of potentially uninitialized variable (GetShapeDistance)
+  api=14 insize=6944 outsize=32921 ok=1
+Cmd: compileComputeKernel
+  api=14 insize=3309 outsize=16949 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=16949 outsize=32125 ok=1
+Cmd: initializeCompiler
+
+Quitting shader compiler process
