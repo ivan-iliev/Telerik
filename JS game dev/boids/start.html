@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<!-- Свали последната версия от:	  https://github.com/StanislavNikolov/gamedev_pishtov -->
+<!-- Download the latest verion from: https://github.com/StanislavNikolov/gamedev_pishtov -->
+<html>
+<head>
+	<style>
+		body, canvas {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta charset="UTF-8"></meta> <!-- allows for cyrillic and other exotic text in console.logs -->
+</head>
+	<body  onload="init()">
+		<canvas id="canvas-id" width="800" height="600">
+		<script>
+			function areColliding(Ax, Ay, Awidth, Aheight, Bx, By, Bwidth, Bheight) {
+				if (Bx <= Ax + Awidth) {
+					if (Ax <= Bx + Bwidth) {
+						if (By <= Ay + Aheight) {
+							if (Ay <= By + Bheight) {
+								return 1;
+							}
+						}
+					}
+				}
+				return 0;
+			};
+
+			function randomInteger(upTo){
+				return Math.floor(Math.random()*upTo);
+			}
+
+			function drawLine(startX, startY, endX, endY) {
+				// For better performance bunch calls to lineTo without beginPath() and stroke() inbetween.
+				context.beginPath(); // resets the current path
+				context.moveTo(startX, startY);
+				context.lineTo(endX, endY);
+				context.stroke();
+			}
+
+			function tryToLoad(imageNameWithoutDotPng, backupColor) {
+				result={};
+				result.img=new Image();
+				result.img.src = "images/"+imageNameWithoutDotPng + ".png";
+				result.color=backupColor;
+				return result;
+			}
+
+			function tryToLoadWithFullPath(imageNameAndPath, backupColor) {
+				result={};
+				result.img=new Image();
+				result.img.src = imageNameAndPath;
+				result.color=backupColor;
+				return result;
+			}
+
+			function drawImage(imageWithBackupColorObject, x, y, xs, ys) {
+				try {
+					if (xs!==undefined){
+						context.drawImage(imageWithBackupColorObject.img, x, y, xs, ys);
+					} else {
+						context.drawImage(imageWithBackupColorObject.img, x, y);
+					}
+				} catch(e) {
+					context.fillStyle = imageWithBackupColorObject.color;
+					if (xs == null) {
+						xs = 100;
+						ys = 100;
+					}
+					context.fillRect(x, y, xs, ys);
+				}
+			}
+			let arrowDown           = tryToLoad("arrowDown","black");
+			let arrowDownLeft       = tryToLoad("arrowDownLeft","black");
+			let arrowDownRight      = tryToLoad("arrowDownRight","black");
+			let arrowLeft           = tryToLoad("arrowLeft","black");
+			let arrowRight          = tryToLoad("arrowRight","black");
+			let arrowUp             = tryToLoad("arrowUp","black");
+			let arrowUpLeft         = tryToLoad("arrowUpLeft","black");
+			let arrowUpRight        = tryToLoad("arrowUpRight","black");
+			let backAlien           = tryToLoad("backAlien","blue");
+			let backBeach           = tryToLoad("backBeach","blue");
+			let backCactus          = tryToLoad("backCactus","orange");
+			let backCake            = tryToLoad("backCake","pink");
+			let backClouds          = tryToLoad("backClouds","blue");
+			let backDesert          = tryToLoad("backDesert","orange");
+			let backForest          = tryToLoad("backForest","green");
+			let backGrass           = tryToLoad("backGrass","green");
+			let backHills           = tryToLoad("backHills","orange");
+			let backIndustry        = tryToLoad("backIndustry","blue");
+			let backMarket          = tryToLoad("backMarket","yellow");
+			let backMountain        = tryToLoad("backMountain","green");
+			let backMushrooms       = tryToLoad("backMushrooms","yellow");
+			let backNight           = tryToLoad("backNight","blue");
+			let backSea             = tryToLoad("backSea","blue");
+			let backSpikes          = tryToLoad("backSpikes","brown");
+			let backStars           = tryToLoad("backStars","black");
+			let backSun             = tryToLoad("backSun","purple");
+			let backSunset          = tryToLoad("backSunset","brown");
+			let backTower           = tryToLoad("backTower","blue");
+			let backTrees           = tryToLoad("backTrees","blue");
+			let backWaterfall       = tryToLoad("backWaterfall","blue");
+			let backWaves           = tryToLoad("backWaves","blue");
+			let ballOrTarget        = tryToLoad("ballOrTarget","blue");
+			let ballOrTree          = tryToLoad("ballOrTree","green");
+			let barrelGreen         = tryToLoad("barrelGreen","green");
+			let barrelGrey          = tryToLoad("barrelGrey","gray");
+			let barrelRed           = tryToLoad("barrelRed","red");
+			let bee                 = tryToLoad("bee","yellow");
+			let bird                = tryToLoad("bird","brown");
+			let bomb                = tryToLoad("bomb","gray");
+			let box                 = tryToLoad("box","brown");
+			let boxAlienGreenSuit   = tryToLoad("boxAlienGreenSuit","green");
+			let boxAlienYellowSquare= tryToLoad("boxAlienYellowSquare","yellow");
+			let boxAlienYellowSuit  = tryToLoad("boxAlienYellowSuit","yellow");
+			let boxItem             = tryToLoad("boxItem","yellow");
+			let boxItemBoxed        = tryToLoad("boxItemBoxed","yellow");
+			let boxItemDisabled     = tryToLoad("boxItemDisabled","gray");
+			let boxItemDisabledBoxed= tryToLoad("boxItemDisabledBoxed","gray");
+			let building = [];
+			    building[0]         = tryToLoad("building[0]","gray");
+			    building[1]         = tryToLoad("building[1]","gray");
+			    building[2]         = tryToLoad("building[2]","gray");
+			    building[3]         = tryToLoad("building[3]","gray");
+			let bullet              = tryToLoad("bullet","green");
+			let burgerBronze        = tryToLoad("burgerBronze","brown");
+			let burgerGold          = tryToLoad("burgerGold","yellow");
+			let burgerSilver        = tryToLoad("burgerSilver","gray");
+			let bush1               = tryToLoad("bush1","red");
+			let bush2               = tryToLoad("bush2","orange");
+			let cactus              = tryToLoad("cactus","green");
+			let cat                 = tryToLoad("cat","orange");
+			let carBlack            = tryToLoad("carBlack","black");
+			let carBlue             = tryToLoad("carBlue","blue");
+			let carBody             = tryToLoad("carBody","red");
+			let carGreen            = tryToLoad("carGreen","green");
+			let carRed              = tryToLoad("carRed","red");
+			let carYellow           = tryToLoad("carYellow","yellow");
+			let cherry              = tryToLoad("cherry","orange");
+			let cloud               = tryToLoad("cloud","white");
+			let crosshairBlue       = tryToLoad("crosshairBlue","blue");
+			let crosshairOutline    = tryToLoad("crosshairOutline","white");
+			let crystal             = tryToLoad("crystal","green");
+			let duckOutlineTarget   = tryToLoad("duckOutlineTarget","green");
+			let duckTarget          = tryToLoad("duckTarget","green");
+			let enemyBlack1         = tryToLoad("enemyBlack1","black");
+			let enemyBlack2         = tryToLoad("enemyBlack2","black");
+			let enemyBlack3         = tryToLoad("enemyBlack3","black");
+			let enemyBlack4         = tryToLoad("enemyBlack4","black");
+			let enemyBlack5         = tryToLoad("enemyBlack5","black");
+			let enemyBlue1          = tryToLoad("enemyBlue1","blue");
+			let enemyBlue2          = tryToLoad("enemyBlue2","blue");
+			let enemyBlue3          = tryToLoad("enemyBlue3","blue");
+			let enemyBlue4          = tryToLoad("enemyBlue4","blue");
+			let enemyBlue5          = tryToLoad("enemyBlue5","blue");
+			let enemyGreen1         = tryToLoad("enemyGreen1","green");
+			let enemyGreen2         = tryToLoad("enemyGreen2","green");
+			let enemyGreen3         = tryToLoad("enemyGreen3","green");
+			let enemyGreen4         = tryToLoad("enemyGreen4","green");
+			let enemyGreen5         = tryToLoad("enemyGreen5","green");
+			let enemyRed1           = tryToLoad("enemyRed1","red");
+			let enemyRed2           = tryToLoad("enemyRed2","red");
+			let enemyRed3           = tryToLoad("enemyRed3","red");
+			let enemyRed4           = tryToLoad("enemyRed4","red");
+			let enemyRed5           = tryToLoad("enemyRed5","red");
+			let explosion           = tryToLoad("explosion","red");
+			let explosion1          = tryToLoad("explosion1","red");
+			let explosion2          = tryToLoad("explosion2","red");
+			let femaleAction        = tryToLoad("femaleAction","blue");
+			let femaleJump          = tryToLoad("femaleJump","blue");
+			let femaleStand         = tryToLoad("femaleStand","blue");
+			let femaleWalk1         = tryToLoad("femaleWalk1","blue");
+			let flagBlue1           = tryToLoad("flagBlue1","blue");
+			let flagGreen1          = tryToLoad("flagGreen1","green");
+			let flagRed1            = tryToLoad("flagRed1","red");
+			let flagYellow1         = tryToLoad("flagYellow1","yellow");
+			let flagYellow2         = tryToLoad("flagYellow2","yellow");
+			let flower1             = tryToLoad("flower1","pink");
+			let flower2             = tryToLoad("flower2","brown");
+			let flower3             = tryToLoad("flower3","yellow");
+			let flower4             = tryToLoad("flower4","red");
+			let flower5             = tryToLoad("flower5","orange");
+			let flowerBlue          = tryToLoad("flowerBlue","blue");
+			let flowerPurple        = tryToLoad("flowerPurple","purple");
+			let flowerRed           = tryToLoad("flowerRed","red");
+			let flowerSmall         = tryToLoad("flowerSmall","blue");
+			let flyMan              = tryToLoad("flyMan","orange");
+			let gemBlue             = tryToLoad("gemBlue","blue");
+			let gemGreen            = tryToLoad("gemGreen","green");
+			let gemRed              = tryToLoad("gemRed","red");
+			let gemYellow           = tryToLoad("gemYellow","yellow");
+			let gem = [];
+			    gem[0]              = tryToLoad("gem[0]","blue");
+			    gem[10]             = tryToLoad("gem[10]","green");
+			    gem[11]             = tryToLoad("gem[11]","blue");
+			    gem[12]             = tryToLoad("gem[12]","green");
+			    gem[13]             = tryToLoad("gem[13]","blue");
+			    gem[14]             = tryToLoad("gem[14]","green");
+			    gem[15]             = tryToLoad("gem[15]","blue");
+			    gem[16]             = tryToLoad("gem[16]","green");
+			    gem[17]             = tryToLoad("gem[17]","blue");
+			    gem[18]             = tryToLoad("gem[18]","green");
+			    gem[19]             = tryToLoad("gem[19]","blue");
+			    gem[1]              = tryToLoad("gem[1]","green");
+			    gem[20]             = tryToLoad("gem[20]","blue");
+			    gem[21]             = tryToLoad("gem[21]","green");
+			    gem[22]             = tryToLoad("gem[22]","blue");
+			    gem[23]             = tryToLoad("gem[23]","green");
+			    gem[24]             = tryToLoad("gem[24]","blue");
+			    gem[25]             = tryToLoad("gem[25]","green");
+			    gem[26]             = tryToLoad("gem[26]","blue");
+			    gem[27]             = tryToLoad("gem[27]","green");
+			    gem[28]             = tryToLoad("gem[28]","blue");
+			    gem[29]             = tryToLoad("gem[29]","green");
+			    gem[2]              = tryToLoad("gem[2]","blue");
+			    gem[30]             = tryToLoad("gem[30]","green");
+			    gem[31]             = tryToLoad("gem[31]","blue");
+			    gem[32]             = tryToLoad("gem[32]","green");
+			    gem[33]             = tryToLoad("gem[33]","blue");
+			    gem[34]             = tryToLoad("gem[34]","green");
+			    gem[35]             = tryToLoad("gem[35]","blue");
+			    gem[36]             = tryToLoad("gem[36]","green");
+			    gem[37]             = tryToLoad("gem[37]","blue");
+			    gem[38]             = tryToLoad("gem[38]","green");
+			    gem[39]             = tryToLoad("gem[39]","blue");
+			    gem[3]              = tryToLoad("gem[3]","green");
+			    gem[40]             = tryToLoad("gem[40]","blue");
+			    gem[41]             = tryToLoad("gem[41]","green");
+			    gem[42]             = tryToLoad("gem[42]","blue");
+			    gem[43]             = tryToLoad("gem[43]","green");
+			    gem[44]             = tryToLoad("gem[44]","blue");
+			    gem[45]             = tryToLoad("gem[45]","green");
+			    gem[46]             = tryToLoad("gem[46]","blue");
+			    gem[47]             = tryToLoad("gem[47]","green");
+			    gem[4]              = tryToLoad("gem[4]","blue");
+			    gem[5]              = tryToLoad("gem[5]","green");
+			    gem[6]              = tryToLoad("gem[6]","blue");
+			    gem[7]              = tryToLoad("gem[7]","green");
+			    gem[8]              = tryToLoad("gem[8]","blue");
+			    gem[9]              = tryToLoad("gem[9]","green");
+			let grass               = tryToLoad("grass","green");
+			let groundCake          = tryToLoad("groundCake","pink");
+			let groundGrass         = tryToLoad("groundGrass","green");
+			let groundSnow          = tryToLoad("groundSnow","white");
+			let groundStone         = tryToLoad("groundStone","gray");
+			let gummyWorm           = tryToLoad("gummyWorm","pink");
+			let heart               = tryToLoad("heart","red");
+			let heartSmall          = tryToLoad("heartSmall","red");
+			let heroHello           = tryToLoad("heroHello","blue");
+			let heroStand           = tryToLoad("heroStand","blue");
+			let heroWalk            = tryToLoad("heroWalk","blue");
+			let house = [];
+			    house[0]            = tryToLoad("house[0]","green");
+			    house[1]            = tryToLoad("house[1]","blue");
+			    house[2]            = tryToLoad("house[2]","gray");
+			    house[3]            = tryToLoad("house[3]","brown");
+			    house[4]            = tryToLoad("house[4]","red");
+			let jelly = [];
+			    jelly[0]            = tryToLoad("jelly[0]","gray");
+			    jelly[1]            = tryToLoad("jelly[1]","yellow");
+			    jelly[2]            = tryToLoad("jelly[2]","green");
+			    jelly[3]            = tryToLoad("jelly[3]","red");
+			    jelly[4]            = tryToLoad("jelly[4]","blue");
+			    jelly[5]            = tryToLoad("jelly[5]","purple");
+			let jetpack             = tryToLoad("jetpack","gray");
+			let jewelBlue           = tryToLoad("jewelBlue","blue");
+			let jewelGreen          = tryToLoad("jewelGreen","green");
+			let jewelRed            = tryToLoad("jewelRed","red");
+			let jewelYellow         = tryToLoad("jewelYellow","yellow");
+			let joystick            = tryToLoad("joystick","black");
+			let laserBlue = [];
+			    laserBlue[0]        = tryToLoad("laserBlue[0]","blue");
+			    laserBlue[1]        = tryToLoad("laserBlue[1]","blue");
+			    laserBlue[2]        = tryToLoad("laserBlue[2]","blue");
+			let laserGreen = [];
+			    laserGreen[0]       = tryToLoad("laserGreen[0]","green");
+			    laserGreen[1]       = tryToLoad("laserGreen[1]","green");
+			    laserGreen[2]       = tryToLoad("laserGreen[2]","green");
+			let laserRed = [];
+			    laserRed[0]         = tryToLoad("laserRed[0]","red");
+			    laserRed[1]         = tryToLoad("laserRed[1]","red");
+			    laserRed[2]         = tryToLoad("laserRed[2]","red");
+			let lava                = tryToLoad("lava","red");
+			let lollipopFruitYellow = tryToLoad("lollipopFruitYellow","yellow");
+			let missile = [];
+			    missile[0]          = tryToLoad("missile[0]","red");
+			    missile[1]          = tryToLoad("missile[1]","blue");
+			    missile[2]          = tryToLoad("missile[2]","blue");
+			    missile[3]          = tryToLoad("missile[3]","blue");
+			    missile[4]          = tryToLoad("missile[4]","blue");
+			    missile[5]          = tryToLoad("missile[5]","blue");
+			    missile[6]          = tryToLoad("missile[6]","blue");
+			    missile[7]          = tryToLoad("missile[7]","red");
+			    missile[8]          = tryToLoad("missile[8]","red");
+			    missile[9]          = tryToLoad("missile[9]","red");
+			let motorBlack          = tryToLoad("motorBlack","black");
+			let motorBlue           = tryToLoad("motorBlue","blue");
+			let motorGreen          = tryToLoad("motorGreen","green");
+			let motorRed            = tryToLoad("motorRed","red");
+			let motorYellow         = tryToLoad("motorYellow","yellow");
+			let ninja = [];
+			    ninja[0]            = tryToLoad("ninja[0]","purple");
+			    ninja[1]            = tryToLoad("ninja[1]","purple");
+			    ninja[2]            = tryToLoad("ninja[2]","purple");
+			    ninja[3]            = tryToLoad("ninja[3]","purple");
+			    ninja[4]            = tryToLoad("ninja[4]","purple");
+			    ninja[5]            = tryToLoad("ninja[5]","purple");
+			    ninja[6]            = tryToLoad("ninja[6]","purple");
+			    ninja[7]            = tryToLoad("ninja[7]","purple");
+			    ninja[8]            = tryToLoad("ninja[8]","purple");
+			    ninja[9]            = tryToLoad("ninja[9]","purple");
+			let note                = tryToLoad("note","black");
+			let paddle              = tryToLoad("paddle","blue");
+			let parrot              = tryToLoad("parrot","blue");
+			let pillBlue            = tryToLoad("pillBlue","blue");
+			let pillGreen           = tryToLoad("pillGreen","green");
+			let pillRed             = tryToLoad("pillRed","red");
+			let pillYellow          = tryToLoad("pillYellow","yellow");
+			let pirate = [];
+			    pirate[0]           = tryToLoad("pirate[0]","brown");
+			    pirate[10]          = tryToLoad("pirate[10]","brown");
+			    pirate[11]          = tryToLoad("pirate[11]","brown");
+			    pirate[12]          = tryToLoad("pirate[12]","brown");
+			    pirate[13]          = tryToLoad("pirate[13]","brown");
+			    pirate[14]          = tryToLoad("pirate[14]","brown");
+			    pirate[15]          = tryToLoad("pirate[15]","brown");
+			    pirate[1]           = tryToLoad("pirate[1]","brown");
+			    pirate[2]           = tryToLoad("pirate[2]","brown");
+			    pirate[3]           = tryToLoad("pirate[3]","brown");
+			    pirate[4]           = tryToLoad("pirate[4]","brown");
+			    pirate[5]           = tryToLoad("pirate[5]","brown");
+			    pirate[6]           = tryToLoad("pirate[6]","brown");
+			    pirate[7]           = tryToLoad("pirate[7]","brown");
+			    pirate[8]           = tryToLoad("pirate[8]","brown");
+			    pirate[9]           = tryToLoad("pirate[9]","brown");
+			let pirateHero          = tryToLoad("pirateHero","green");
+			let plane               = tryToLoad("plane","green");
+			let planeGray           = tryToLoad("planeGray","gray");
+			let planeGreen          = tryToLoad("planeGreen","green");
+			let playerShip1_blue    = tryToLoad("playerShip1_blue","blue");
+			let playerShip1_green   = tryToLoad("playerShip1_green","green");
+			let playerShip1_orange  = tryToLoad("playerShip1_orange","orange");
+			let playerShip1_red     = tryToLoad("playerShip1_red","red");
+			let playerShip2_blue    = tryToLoad("playerShip2_blue","blue");
+			let playerShip2_green   = tryToLoad("playerShip2_green","green");
+			let playerShip2_orange  = tryToLoad("playerShip2_orange","orange");
+			let playerShip2_red     = tryToLoad("playerShip2_red","red");
+			let playerShip3_blue    = tryToLoad("playerShip3_blue","blue");
+			let playerShip3_green   = tryToLoad("playerShip3_green","green");
+			let playerShip3_orange  = tryToLoad("playerShip3_orange","orange");
+			let playerShip3_red     = tryToLoad("playerShip3_red","red");
+			let powerupBlue         = tryToLoad("powerupBlue","blue");
+			let powerupBlueBolt     = tryToLoad("powerupBlueBolt","blue");
+			let powerupBlueShield   = tryToLoad("powerupBlueShield","blue");
+			let powerupBlueStar     = tryToLoad("powerupBlueStar","blue");
+			let powerupGreen        = tryToLoad("powerupGreen","green");
+			let powerupGreenBolt    = tryToLoad("powerupGreenBolt","green");
+			let powerupGreenShield  = tryToLoad("powerupGreenShield","green");
+			let powerupGreenStar    = tryToLoad("powerupGreenStar","green");
+			let powerupRed          = tryToLoad("powerupRed","red");
+			let powerupRedBolt      = tryToLoad("powerupRedBolt","red");
+			let powerupRedShield    = tryToLoad("powerupRedShield","red");
+			let powerupRedStar      = tryToLoad("powerupRedStar","red");
+			let powerupYellowShield = tryToLoad("powerupYellowShield","yellow");
+			let powerupYellow       = tryToLoad("powerupYellow","yellow");
+			let powerupYellowBolt   = tryToLoad("powerupYellowBolt","yellow");
+			let powerupYellowStar   = tryToLoad("powerupYellowStar","yellow");
+			let princess = [];
+			    princess[0]         = tryToLoad("princess[0]","pink");
+			    princess[10]        = tryToLoad("princess[10]","pink");
+			    princess[11]        = tryToLoad("princess[11]","pink");
+			    princess[12]        = tryToLoad("princess[12]","pink");
+			    princess[13]        = tryToLoad("princess[13]","pink");
+			    princess[14]        = tryToLoad("princess[14]","pink");
+			    princess[15]        = tryToLoad("princess[15]","pink");
+			    princess[16]        = tryToLoad("princess[16]","pink");
+			    princess[17]        = tryToLoad("princess[17]","pink");
+			    princess[18]        = tryToLoad("princess[18]","pink");
+			    princess[19]        = tryToLoad("princess[19]","pink");
+			    princess[1]         = tryToLoad("princess[1]","pink");
+			    princess[2]         = tryToLoad("princess[2]","pink");
+			    princess[3]         = tryToLoad("princess[3]","pink");
+			    princess[4]         = tryToLoad("princess[4]","pink");
+			    princess[5]         = tryToLoad("princess[5]","pink");
+			    princess[6]         = tryToLoad("princess[6]","pink");
+			    princess[7]         = tryToLoad("princess[7]","pink");
+			    princess[8]         = tryToLoad("princess[8]","pink");
+			    princess[9]         = tryToLoad("princess[9]","pink");
+			let repair              = tryToLoad("repair","blue");
+			let robot               = tryToLoad("robot","blue");
+			let robotJump           = tryToLoad("robotJump","blue");
+			let robotHero = [];
+			    robotHero[0]        = tryToLoad("robotHero[0]","yellow");
+			    robotHero[1]        = tryToLoad("robotHero[1]","yellow");
+			    robotHero[2]        = tryToLoad("robotHero[2]","yellow");
+			    robotHero[3]        = tryToLoad("robotHero[3]","yellow");
+			    robotHero[4]        = tryToLoad("robotHero[4]","yellow");
+			    robotHero[5]        = tryToLoad("robotHero[5]","yellow");
+			    robotHero[6]        = tryToLoad("robotHero[6]","yellow");
+			    robotHero[7]        = tryToLoad("robotHero[7]","yellow");
+			let rock                = tryToLoad("rock","gray");
+			let rocket = [];
+			    rocket[0]           = tryToLoad("rocket[0]","red");
+			    rocket[1]           = tryToLoad("rocket[1]","red");
+			    rocket[2]           = tryToLoad("rocket[2]","red");
+			    rocket[3]           = tryToLoad("rocket[3]","red");
+			let sailor              = tryToLoad("sailor","red");
+			let scrollHorizontal    = tryToLoad("scrollHorizontal","black");
+			let scrollVertical      = tryToLoad("scrollVertical","black");
+			let shieldBronze        = tryToLoad("shieldBronze","brown");
+			let shieldGold          = tryToLoad("shieldGold","yellow");
+			let shieldSilver        = tryToLoad("shieldSilver","gray");
+			let shooter             = tryToLoad("shooter","brown");
+			let shop                = tryToLoad("shop","red");
+			let sign                = tryToLoad("sign","brown");
+			let signExit            = tryToLoad("signExit","brown");
+			let signLeft            = tryToLoad("signLeft","brown");
+			let signRight           = tryToLoad("signRight","brown");
+			let spaceship = [];
+			    spaceship[0]        = tryToLoad("spaceship[0]","red");
+			    spaceship[1]        = tryToLoad("spaceship[1]","red");
+			    spaceship[2]        = tryToLoad("spaceship[2]","red");
+			    spaceship[3]        = tryToLoad("spaceship[3]","red");
+			    spaceship[4]        = tryToLoad("spaceship[4]","red");
+			    spaceship[5]        = tryToLoad("spaceship[5]","red");
+			    spaceship[6]        = tryToLoad("spaceship[6]","red");
+			    spaceship[7]        = tryToLoad("spaceship[7]","red");
+			    spaceship[8]        = tryToLoad("spaceship[8]","red");
+			    spaceship[9]        = tryToLoad("spaceship[9]","red");
+			let spaceStation = [];
+			    spaceStation[0]     = tryToLoad("spaceStation[0]","blue");
+			    spaceStation[1]     = tryToLoad("spaceStation[1]","yellow");
+			    spaceStation[2]     = tryToLoad("spaceStation[2]","blue");
+			    spaceStation[3]     = tryToLoad("spaceStation[3]","yellow");
+			let spikeMan            = tryToLoad("spikeMan","red");
+			let spring              = tryToLoad("spring","orange");
+			let springMan           = tryToLoad("springMan","orange");
+			let sprung              = tryToLoad("sprung","orange");
+			let spy = [];
+			    spy[0]              = tryToLoad("spy[0]","black");
+			    spy[1]              = tryToLoad("spy[1]","black");
+			    spy[2]              = tryToLoad("spy[2]","black");
+			    spy[3]              = tryToLoad("spy[3]","black");
+			    spy[4]              = tryToLoad("spy[4]","black");
+			    spy[5]              = tryToLoad("spy[5]","black");
+			    spy[6]              = tryToLoad("spy[6]","black");
+			    spy[7]              = tryToLoad("spy[7]","black");
+			    spy[8]              = tryToLoad("spy[8]","black");
+			    spy[9]              = tryToLoad("spy[9]","black");
+			let star                = tryToLoad("star","yellow");
+			let starBronze          = tryToLoad("starBronze","brown");
+			let starDiamond         = tryToLoad("starDiamond","blue");
+			let starGold            = tryToLoad("starGold","yellow");
+			let starSilver          = tryToLoad("starSilver","gray");
+			let sun                 = tryToLoad("sun","yellow");
+			let tanksAmmo           = tryToLoad("tanksAmmo","black");
+			let tanksArmor          = tryToLoad("tanksArmor","red");
+			let tank = [];
+			    tank[0]             = tryToLoad("tank[0]","gray");
+			    tank[1]             = tryToLoad("tank[1]","gray");
+			    tank[2]             = tryToLoad("tank[2]","green");
+			    tank[3]             = tryToLoad("tank[3]","green");
+			    tank[4]             = tryToLoad("tank[4]","red");
+			    tank[5]             = tryToLoad("tank[5]","red");
+			    tank[6]             = tryToLoad("tank[6]","black");
+			    tank[7]             = tryToLoad("tank[7]","black");
+			let thunderBronze       = tryToLoad("thunderBronze","brown");
+			let thunderGold         = tryToLoad("thunderGold","yellow");
+			let thunderGray         = tryToLoad("thunderGray","gray");
+			let torch               = tryToLoad("torch","red");
+			let torchOff            = tryToLoad("torchOff","brown");
+			let tree = [];
+			    tree[0]             = tryToLoad("tree[0]","orange");
+			    tree[1]             = tryToLoad("tree[1]","red");
+			    tree[2]             = tryToLoad("tree[2]","yellow");
+			    tree[3]             = tryToLoad("tree[3]","green");
+			    tree[4]             = tryToLoad("tree[4]","brown");
+			let troll               = tryToLoad("troll","green");
+			let vehicle = [];
+			    vehicle[0]          = tryToLoad("vehicle[0]","gray");
+			    vehicle[10]         = tryToLoad("vehicle[10]","gray");
+			    vehicle[11]         = tryToLoad("vehicle[11]","gray");
+			    vehicle[12]         = tryToLoad("vehicle[12]","gray");
+			    vehicle[13]         = tryToLoad("vehicle[13]","gray");
+			    vehicle[14]         = tryToLoad("vehicle[14]","gray");
+			    vehicle[15]         = tryToLoad("vehicle[15]","gray");
+			    vehicle[1]          = tryToLoad("vehicle[1]","gray");
+			    vehicle[2]          = tryToLoad("vehicle[2]","gray");
+			    vehicle[3]          = tryToLoad("vehicle[3]","gray");
+			    vehicle[4]          = tryToLoad("vehicle[4]","gray");
+			    vehicle[5]          = tryToLoad("vehicle[5]","gray");
+			    vehicle[6]          = tryToLoad("vehicle[6]","gray");
+			    vehicle[7]          = tryToLoad("vehicle[7]","gray");
+			    vehicle[8]          = tryToLoad("vehicle[8]","gray");
+			    vehicle[9]          = tryToLoad("vehicle[9]","gray");
+			let volcano             = tryToLoad("volcano","black");
+			let zombie              = tryToLoad("zombie","green");
+			let zombieHello         = tryToLoad("zombieHello","green");
+			let zombieWalk          = tryToLoad("zombieWalk","green");
+            let buildingTile        = [];
+                buildingTile[0]     = tryToLoad("buildingTile[0]", "gray");
+                buildingTile[1]     = tryToLoad("buildingTile[1]", "gray");
+                buildingTile[2]     = tryToLoad("buildingTile[2]", "gray");
+                buildingTile[3]     = tryToLoad("buildingTile[3]", "gray");
+                buildingTile[4]     = tryToLoad("buildingTile[4]", "gray");
+                buildingTile[5]     = tryToLoad("buildingTile[5]", "gray");
+                buildingTile[6]     = tryToLoad("buildingTile[6]", "gray");
+                buildingTile[7]     = tryToLoad("buildingTile[7]", "gray");
+                buildingTile[8]     = tryToLoad("buildingTile[8]", "gray");
+                buildingTile[9]     = tryToLoad("buildingTile[9]", "gray");
+                buildingTile[10]    = tryToLoad("buildingTile[10]", "gray");
+                buildingTile[11]    = tryToLoad("buildingTile[11]", "gray");
+                buildingTile[12]    = tryToLoad("buildingTile[12]", "gray");
+                buildingTile[13]    = tryToLoad("buildingTile[13]", "gray");
+                buildingTile[14]    = tryToLoad("buildingTile[14]", "gray");
+                buildingTile[15]    = tryToLoad("buildingTile[15]", "gray");
+                buildingTile[16]    = tryToLoad("buildingTile[16]", "gray");
+                buildingTile[17]    = tryToLoad("buildingTile[17]", "gray");
+                buildingTile[18]    = tryToLoad("buildingTile[18]", "gray");
+                buildingTile[18]    = tryToLoad("buildingTile[18]", "gray");
+                buildingTile[19]    = tryToLoad("buildingTile[19]", "gray");
+                buildingTile[20]    = tryToLoad("buildingTile[20]", "gray");
+                buildingTile[21]    = tryToLoad("buildingTile[21]", "gray");
+                buildingTile[22]    = tryToLoad("buildingTile[22]", "gray");
+                buildingTile[23]    = tryToLoad("buildingTile[23]", "gray");
+                buildingTile[24]    = tryToLoad("buildingTile[24]", "gray");
+                buildingTile[25]    = tryToLoad("buildingTile[25]", "gray");
+                buildingTile[26]    = tryToLoad("buildingTile[26]", "gray");
+                buildingTile[27]    = tryToLoad("buildingTile[27]", "gray");
+                buildingTile[28]    = tryToLoad("buildingTile[28]", "gray");
+                buildingTile[29]    = tryToLoad("buildingTile[29]", "gray");
+                buildingTile[30]    = tryToLoad("buildingTile[30]", "gray");
+                buildingTile[31]    = tryToLoad("buildingTile[31]", "gray");
+                buildingTile[32]    = tryToLoad("buildingTile[32]", "gray");
+                buildingTile[33]    = tryToLoad("buildingTile[33]", "gray");
+                buildingTile[34]    = tryToLoad("buildingTile[34]", "gray");
+                buildingTile[35]    = tryToLoad("buildingTile[35]", "gray");
+                buildingTile[36]    = tryToLoad("buildingTile[36]", "gray");
+                buildingTile[37]    = tryToLoad("buildingTile[37]", "gray");
+                buildingTile[38]    = tryToLoad("buildingTile[38]", "gray");
+                buildingTile[39]    = tryToLoad("buildingTile[39]", "gray");
+                buildingTile[40]    = tryToLoad("buildingTile[40]", "gray");
+            let isoCubeBlue         = tryToLoad("isoCubeBlue", "blue");
+            let isoCubeOrange       = tryToLoad("isoCubeOrange", "blue");
+            let isoCubePurple       = tryToLoad("isoCubePurple", "blue");
+            let paddleGhost         = tryToLoad("paddleGhost", "yellow");
+            let slabBlue            = tryToLoad("slabBlue", "blue");   
+            let slabRed             = tryToLoad("slabRed", "blue");   
+            let slabYellow          = tryToLoad("slabYellow", "blue");   
+			let endlessCanvas = false;
+			let updateTime = 10; // in ms
+			</script>
+			<!-- user's game file -->
+			<script src="game.js"></script>
+			<script>
+			const canvas = document.getElementById("canvas-id");
+            if (endlessCanvas) {
+                canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+				window.onresize = function () {
+				    canvas.width = window.innerWidth;
+					canvas.height = window.innerHeight;
+				};
+            } else {
+				canvas.width = 800;
+				canvas.height = 600;
+            }
+			const context = canvas.getContext("2d");
+			context.fillStyle = "#0000ff";
+            // global variables with mouse coordinates
+			let mouseX = 0;
+			let mouseY = 0;
+            // some keycodes
+			let key_left = 37;
+			let key_up = 38;
+            let key_right = 39;
+			let key_down = 40;
+			let key_a = 65;
+			let key_z = 90;
+			let isKeyPressed = [];
+			for (i = 0; i < 256; ++i) {
+				isKeyPressed.push(0);
+			}
+			// gridSize = 50; // uncomment or add to game.js if you want a grid
+			const reqAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
+				setTimeout(callback, 1000 / 30);
+			};
+			function redraw() {
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				draw(); // call progammer's draw() function
+				context.globalAlpha = 1;
+				// draw grid
+				//context.fillStyle = "#FF0000";
+				context.font = "10px Arial";
+				if (typeof gridSize != "undefined" && gridSize >= 25) {
+					context.fillText(0, 4, 10);
+					context.beginPath();
+					for(i = gridSize;i < canvas.width;i += gridSize) {
+						context.moveTo(i, 0);
+						context.lineTo(i, canvas.height);
+						context.fillText(i, i + 4, 10);
+					}
+					for(i = gridSize;i < canvas.height;i += gridSize) {
+						context.moveTo(0, i);
+						context.lineTo(canvas.width, i);
+						context.fillText(i, 4, i + 10);
+					}
+					context.stroke();
+				}
+
+				reqAnimationFrame(redraw);
+			};
+
+			function init() {
+				if ('ontouchstart' in window || navigator.maxTouchPoints) {
+					isMobile = true;
+					window.addEventListener("touchstart", function (e) {
+						let touchobj = e.changedTouches[0];
+						mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+						mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+						mousedown();
+					});
+					window.addEventListener("touchend", function (e) {
+						let touchobj = e.changedTouches[0];
+						mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+						mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+						mouseup();
+					});
+					window.addEventListener("touchmove", function (e) {
+						let touchobj = e.changedTouches[0];
+						mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+						mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+					});
+				}
+				window.addEventListener("mousemove", function (e) {
+					mouseX = e.pageX - canvas.offsetLeft;
+					mouseY = e.pageY - canvas.offsetTop;
+				});
+				if(typeof mousemove != "undefined") {
+					window.addEventListener("mousemove", mousemove);
+				}
+				if(typeof mouseup != "undefined") {
+					window.addEventListener("mouseup", mouseup);
+				}
+				if(typeof mousedown != "undefined") {
+					window.addEventListener("mousedown", mousedown);
+				}
+				if(typeof keydown != "undefined") {
+					window.addEventListener("keydown", function (e) {
+						isKeyPressed[e.keyCode] = 1;
+						keydown(e.keyCode);
+					});
+				} else {
+					window.addEventListener("keydown", function (e) {
+						isKeyPressed[e.keyCode] = 1;
+					});
+				}
+				if(typeof keyup != "undefined") {
+					window.addEventListener("keyup", function (e) {
+						isKeyPressed[e.keyCode] = 0;
+						keyup(e.keyCode);
+					});
+				} else {
+					window.addEventListener("keyup", function (e) {
+						isKeyPressed[e.keyCode] = 0;
+					});
+				}
+				if(typeof draw == "undefined") {
+					redraw = function () {
+						context.clearRect(0, 0, canvas.width, canvas.height);
+						context.globalAlpha = 1;
+						context.fillStyle = "#FF0000";
+						context.font = "20px Arial";
+						context.fillText("Press <F12> for error info!", 40, 40);
+					};
+				}
+				redraw();
+				setInterval(update, updateTime);
+			}
+			</script>
+		</canvas>
+	</body>
+</html>
