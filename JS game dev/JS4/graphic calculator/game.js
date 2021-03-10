@@ -10,7 +10,7 @@ function drawCalc(a){
     }
 }
 
-drawCalc(function f(x) {return Math.sin(x*100)});
+drawCalc(function f(x) {return -1 * x * x +2 * x + 6);
 
 
 function update() {
